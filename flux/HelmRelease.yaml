@@ -13,11 +13,6 @@ spec:
         kind: GitRepository
         name: helm
         namespace: flux-system
-  values:
-    replicaCount: 3
-    image:
-      repository: nginx
-      tag: latest
-    service:
-      type: ClusterIP
-      port: 80
+  valuesFrom:
+    - kind: ConfigMap
+      name: mychart-values  # 這是存放 values.yaml 的 ConfigMap

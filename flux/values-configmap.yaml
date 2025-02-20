@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mychart-values
+  namespace: default
+data:
+  values.yaml: |
+    replicaCount: 3
+    image:
+      repository: nginx
+      tag: latest
+    service:
+      type: ClusterIP
+      port: 80
