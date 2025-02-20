@@ -1,0 +1,24 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: mychart
+  namespace: default
+spec:
+  releaseName: mychart
+  interval: 5m
+  chart:
+    spec:
+      chart: mychart   # 這裡應該對應到你的 Chart 名稱
+      sourceRef:
+        kind: GitRepository
+        name: helm  # 你的 GitOps Repo 名稱
+        namespace: flux-system
+  values:
+    replicaCount: 2
+    image:
+      repository: nginx
+      tag: latest
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 80
