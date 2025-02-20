@@ -1,24 +1,22 @@
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v1
 kind: HelmRelease
 metadata:
-  name: mychart
+  name: myapp
   namespace: default
 spec:
-  releaseName: mychart
-  interval: 5m
+  interval: 1m  # 每分鐘檢查一次是否有變更
   chart:
     spec:
-      chart: mychart   # 這裡應該對應到你的 Chart 名稱
+      chart: ./mychart  # 這要對應你的 Helm Chart 目錄
       sourceRef:
         kind: GitRepository
-        name: helm  # 你的 GitOps Repo 名稱
+        name: helm
         namespace: flux-system
   values:
     replicaCount: 2
     image:
       repository: nginx
       tag: latest
-      pullPolicy: IfNotPresent
     service:
       type: ClusterIP
       port: 80
