@@ -7,7 +7,8 @@ spec:
   interval: 1m  # 每分鐘檢查一次是否有變更
   chart:
     spec:
-      chart: ./mychart  # 這要對應你的 Helm Chart 目錄
+      chart: mychart  # 這裡應該是 Git 內的 Chart 資料夾名稱，而不是本機路徑
+      version: 0.1.0  # 這應該是 Chart 的版本 (optional)
       sourceRef:
         kind: GitRepository
         name: helm
