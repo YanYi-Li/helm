@@ -2,19 +2,26 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ .Release.Name }}  # 確保 Pod 有這個 Label
+
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: {{ .Release.Name }}
+      app.kubernetes.io/name: {{ .Release.Name }}  #  讓 Service 能找到 Pod
+
   template:
     metadata:
       labels:
         app: {{ .Release.Name }}
+        app.kubernetes.io/name: {{ .Release.Name }}  #  確保 Pod 有這個 Label
     spec:
       containers:
         - name: {{ .Release.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: 8081
+            - containerPort: 8080
