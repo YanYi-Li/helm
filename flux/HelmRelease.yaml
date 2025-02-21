@@ -14,6 +14,6 @@ spec:
         name: helm
         namespace: flux-system
   valuesFrom:
-    - kind: GitRepository
-      name: helm
+    - kind: ConfigMap
+      name: mychart-values
       valuesKey: "mychart/values.yaml"  # 指定 GitHub Repo 內的 values.yaml

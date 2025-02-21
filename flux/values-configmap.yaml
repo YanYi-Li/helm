@@ -5,7 +5,7 @@ metadata:
   namespace: default
 data:
   values.yaml: |
-    replicaCount: 3
+    replicaCount: 4 # 確保與 values.yaml 一致
     image:
       repository: nginx
       tag: latest
