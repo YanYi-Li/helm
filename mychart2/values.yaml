@@ -1,0 +1,17 @@
+replicaCount: 2  
+
+image:
+  repository: zxc25321716/spring-boot-demo  # 你的 Docker Hub Repository
+  tag: v1
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8081
+
+serviceAccount:
+  create: true
+
+ingress:
+  enabled: false
+

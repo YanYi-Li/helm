@@ -1,19 +1,17 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: myapp
+  name: myapp2
   namespace: default
 spec:
-  interval: 1m  # 每分鐘檢查一次是否有變更
+  interval: 1m
   chart:
     spec:
-      chart: mychart  # 這裡應該是 Git 內的 Chart 資料夾名稱，而不是本機路徑
-      version: 0.1.0  # 這應該是 Chart 的版本 (optional)
+      chart: mychart2
       sourceRef:
         kind: GitRepository
         name: helm
         namespace: flux-system
-  valuesFrom:
-    - kind: ConfigMap
-      name: mychart-values
-      valuesKey: "mychart/values.yaml"  # 指定 GitHub Repo 內的 values.yaml
+  values:
+    ingress:
+      enabled: false
