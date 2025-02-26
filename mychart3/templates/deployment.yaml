@@ -1,0 +1,29 @@
+{{- range $key, $app := .Values.apps }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $app.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $app.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $app.name }}
+    spec:
+      containers:
+        - name: {{ $app.name }}
+          image: "{{ $app.image }}:{{ $app.tag }}"
+          ports:
+            - containerPort: {{ $app.port }}
+          readinessProbe:
+            httpGet:
+              path: /actuator/health  #  改成 Actuator API
+              port: {{ $app.port }}
+            initialDelaySeconds: 5  #  延遲 5 秒後檢查
+            periodSeconds: 10  #  每 10 秒檢查一次
+            failureThreshold: 3  # 失敗 3 次才標記為 Unready
+{{- end }}

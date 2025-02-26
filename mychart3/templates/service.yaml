@@ -1,0 +1,14 @@
+{{- range $key, $app := .Values.apps }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $app.name }}
+spec:
+  selector:
+    app: {{ $app.name }}
+  ports:
+    - protocol: TCP
+      port: {{ $app.port }}  # 讓 Service 直接監聽 8080
+      targetPort: {{ $app.port }}
+{{- end }}

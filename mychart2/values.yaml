@@ -1,4 +1,4 @@
-replicaCount: 2  
+replicaCount: 3
 
 image:
   repository: zxc25321716/spring-boot-demo  # 你的 Docker Hub Repository
@@ -6,6 +6,7 @@ image:
   pullPolicy: IfNotPresent
 
 service:
+  name: myapp2  # 確保這裡的名稱和 Service 一致
   type: ClusterIP
   port: 8080
 
@@ -13,12 +14,15 @@ serviceAccount:
   create: true
 
 ingress:
-  enabled: false
+  enabled: true 
+  className: "nginx"
   hosts:
-    - host: "myapp.local"  
+    - host: "myapp2local"
       paths:
         - path: /
           pathType: Prefix	
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /	
 
 autoscaling:
   enabled: false  

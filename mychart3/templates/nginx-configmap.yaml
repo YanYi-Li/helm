@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  nginx.conf: |
+    events {}
+
+    http {
+        upstream app_a {
+            server app-a.default.svc.cluster.local:8080 max_fails=3 fail_timeout=5s;
+        }
+
+        upstream app_b {
+            server app-b.default.svc.cluster.local:8080 max_fails=3 fail_timeout=5s;
+        }
+
+        server {
+            listen 80;
+
+            location /a {
+                rewrite ^/a(/.*)$ $1 break;
+                proxy_pass http://app_a;
+                proxy_set_header Host $host;
+            }
+
+            location /b {
+                rewrite ^/b(/.*)$ $1 break;
+                proxy_pass http://app_b;
+                proxy_set_header Host $host;
+            }
+
+            error_page 502 =503 /fallback;
+            location /fallback {
+                return 503 "Service Temporarily Unavailable";
+            }
+        }
+    }

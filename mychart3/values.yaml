@@ -1,0 +1,49 @@
+replicaCount: 1
+
+image:
+  repository: zxc25321716/spring-boot-demo
+  tag: v1
+  pullPolicy: IfNotPresent
+
+apps:
+  appA:
+    name: app-a
+    image: zxc25321716/spring-boot-demo
+    tag: "v1"
+    port: 8080
+
+  appB:
+    name: app-b
+    image: zxc25321716/spring-boot-demo
+    tag: "v1"
+    port: 8080
+
+service:
+  port: 80
+
+serviceAccount:
+  create: true
+
+nginxProxy:
+  name: nginx-proxy
+  image: "nginx:latest"
+  port: 80
+
+ingress:
+  enabled: true
+  className: "nginx"
+  hosts:
+    - host: "mychart3.local"
+      paths:
+        - path: "/a"
+          pathType: "Prefix"
+          backendService: "nginx-proxy"
+        - path: "/b"
+          pathType: "Prefix"
+          backendService: "nginx-proxy"
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
