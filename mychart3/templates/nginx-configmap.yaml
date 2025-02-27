@@ -7,17 +7,73 @@ data:
     events {}
 
     http {
+
+        # 明確指定日誌路徑
+        error_log /var/log/nginx/error.log;
+        access_log /var/log/nginx/access.log;
+
+        # Upstream 配置
         upstream app_a {
+            # 目標 4：實現負載均衡，將 /a 的流量平均分配到多個 app-a 實例
+            # 使用 Kubernetes 服務解析多個 app-a Pod IP，配合 least_conn 策略
             server app-a.default.svc.cluster.local:8080 max_fails=3 fail_timeout=5s;
+            least_conn;  # 最少連接負載均衡策略
+
+            # 目標 5：使用 nginx_upstream_check_module 設定健康檢查
+            # 每 5 秒檢查一次，連續 2 次成功標記為健康，3 次失敗標記為不可用
+            check interval=5000 rise=2 fall=3 timeout=2000 type=http;
+            check_http_send "GET /actuator/health HTTP/1.1\r\nHost: app-a\r\nConnection: close\r\n\r\n";
+            check_http_expect_alive http_2xx http_3xx;
         }
 
         upstream app_b {
             server app-b.default.svc.cluster.local:8080 max_fails=3 fail_timeout=5s;
+
+            # 目標 5：健康檢查配置
+            check interval=5000 rise=2 fall=3 timeout=2000 type=http;
+            check_http_send "GET /actuator/health HTTP/1.1\r\nHost: app-b\r\nConnection: close\r\n\r\n";
+            check_http_expect_alive http_2xx http_3xx;
         }
 
+        # 目標 2：針對特定 URL（不同域名）分流
+        # 域名 app-a.mychart3.local 導向 app-a
         server {
             listen 80;
+            server_name app-a.mychart3.local;
 
+            location / {
+                proxy_pass http://app_a;
+                proxy_set_header Host $host;
+            }
+
+            error_page 502 =503 /fallback;
+            location /fallback {
+                return 503 "Service Temporarily Unavailable";
+            }
+        }
+
+        # 域名 app-b.mychart3.local 導向 app-b
+        server {
+            listen 80;
+            server_name app-b.mychart3.local;
+
+            location / {
+                proxy_pass http://app_b;
+                proxy_set_header Host $host;
+            }
+
+            error_page 502 =503 /fallback;
+            location /fallback {
+                return 503 "Service Temporarily Unavailable";
+            }
+        }
+
+        # 原有 mychart3.local 的配置（保留路徑分流兼容性）
+        server {
+            listen 80;
+            server_name mychart3.local;
+
+            # 目標 1：將路徑 /a 導向 app-a，/b 導向 app-b
             location /a {
                 rewrite ^/a(/.*)$ $1 break;
                 proxy_pass http://app_a;
@@ -30,6 +86,46 @@ data:
                 proxy_set_header Host $host;
             }
 
+            # 目標 2（備選）：針對特定 URL 分流（同一域名下的示例）
+            # 示例：/special?type=a 導向 app-a，type=b 導向 app-b
+            location /special {
+                if ($arg_type = "a") {
+                    rewrite ^/special(/.*)$ $1 break;
+                    proxy_pass http://app_a;
+                }
+                if ($arg_type = "b") {
+                    rewrite ^/special(/.*)$ $1 break;
+                    proxy_pass http://app_b;
+                }
+                # 默認導向 app-a
+                rewrite ^/special(/.*)$ $1 break;
+                proxy_pass http://app_a;
+                proxy_set_header Host $host;
+            }
+
+            # 目標 3：根據請求頭 X-App-Type 動態選擇 app-a 或 app-b
+            set $upstream http://app_a;  # 默認上游
+            location /dynamic {
+                if ($http_x_app_type = "app-b") {
+                    set $upstream http://app_b;
+                }
+                rewrite ^/dynamic(/.*)$ $1 break;
+                proxy_pass $upstream;
+                proxy_set_header Host $host;
+            }
+
+            # 目標 5：健康檢查狀態頁面
+            location /status {
+                check_status;  # 顯示 upstream 健康狀態
+                access_log off;
+            }
+
+            # 添加默認回應
+            location / { 
+                return 200 "NGINX Proxy is running"; 
+            }  
+
+            # 錯誤處理
             error_page 502 =503 /fallback;
             location /fallback {
                 return 503 "Service Temporarily Unavailable";

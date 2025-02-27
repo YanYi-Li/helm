@@ -8,8 +8,8 @@ metadata:
     "helm.sh/hook": test
 spec:
   containers:
-    - name: wget
-      image: busybox
-      command: ['wget']
-      args: ['{{ include "mychart3.fullname" . }}:{{ .Values.service.port }}']
+  - name: wget
+    image: busybox
+    command: ["wget"]
+    args: ["--spider", "--timeout=5", "nginx-proxy.default.svc.cluster.local:80"]
   restartPolicy: Never

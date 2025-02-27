@@ -1,4 +1,4 @@
-replicaCount: 1
+replicaCount: 3
 
 image:
   repository: zxc25321716/spring-boot-demo
@@ -26,7 +26,7 @@ serviceAccount:
 
 nginxProxy:
   name: nginx-proxy
-  image: "nginx:latest"
+  image: "zxc25321716/custom-nginx:latest"
   port: 80
 
 ingress:
@@ -41,9 +41,28 @@ ingress:
         - path: "/b"
           pathType: "Prefix"
           backendService: "nginx-proxy"
+        - path: "/special"
+          pathType: "Prefix"
+          backendService: "nginx-proxy"
+        - path: "/dynamic"
+          pathType: "Prefix"
+          backendService: "nginx-proxy"
+        - path: "/status"
+          pathType: "Prefix"
+          backendService: "nginx-proxy"
+    - host: "app-a.mychart3.local"
+      paths:
+        - path: "/"
+          pathType: "Prefix"
+          backendService: "nginx-proxy"
+    - host: "app-b.mychart3.local"
+      paths:
+        - path: "/"
+          pathType: "Prefix"
+          backendService: "nginx-proxy"
 
 autoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 1
   maxReplicas: 5
   targetCPUUtilizationPercentage: 80
