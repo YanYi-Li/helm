@@ -1,0 +1,45 @@
+replicaCount: 3
+
+images:
+  app1:
+    repository: zxc25321716/spring-boot-demo 
+    tag: v1
+    pullPolicy: IfNotPresent
+  app2:
+    repository: zxc25321716/spring-boot-health
+    tag: v1
+    pullPolicy: IfNotPresent
+
+services:
+  app1:
+    name: myapp4
+    type: ClusterIP
+    port: 8080
+  app2:
+    name: myapp4-health
+    type: ClusterIP
+    port: 9090
+
+serviceAccount:
+  create: true
+
+ingress:
+  enabled: true 
+  className: "nginx"
+  hosts:
+    - host: "myapp4.local"
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: "myapp4.pro.local"
+      paths:
+        - path: /
+          pathType: Prefix
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /	
+
+autoscaling:
+  enabled: false  
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80

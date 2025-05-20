@@ -1,0 +1,5 @@
+apiVersion: v2
+name: mychart4
+description: for health check demo 
+version: 0.1.0
+appVersion: "1.16.0"

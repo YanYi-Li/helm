@@ -11,5 +11,5 @@ spec:
   - name: wget
     image: busybox
     command: ["wget"]
-    args: ["--spider", "--timeout=5", "nginx-proxy.default.svc.cluster.local:80"]
+    args: ["--spider", "--timeout=5", "nginx-proxy.default.svc.cluster.local:8080/status"]
   restartPolicy: Never
